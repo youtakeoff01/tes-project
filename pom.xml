@@ -101,7 +101,7 @@
             <artifactId>hana-connector-java</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>D:/tools/hana-connector-java-1.0.jar</systemPath>
+            <systemPath>D:/lib/hana-connector-java-1.0.jar</systemPath>
         </dependency>
     </dependencies>
     <build>
