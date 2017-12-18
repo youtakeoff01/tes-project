@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd"
+	default-lazy-init="true" default-init-method="init">
+
+	<!-- Storm config -->
+	<bean id="stormConfig" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="kafka.brokerZkStr" value="172.26.119.73:2181,172.26.119.74:2181,172.26.119.69:2181" />
+				<entry key="kafka.brokerZkPath" value="/brokers" />
+				<entry key="kafka.offset.zkServers">
+					<list>
+						<value>catl-tes-kafka02.catlbattery.com</value>
+						<value>catl-tes-kafka01.catlbattery.com</value>
+						<value>catl-tes-ambari.catlbattery.com</value>
+					</list>
+				</entry>
+				<entry key="kafka.offset.zkPort" value="2181" />
+				<entry key="kafka.offset.zkRoot" value="/kafka-offset" />
+			</map>
+		</property>
+	</bean>
+	
+	<!-- hana 连接池 -->
+	<bean id="dbUtils" class="com.edcs.tds.storm.util.DBHelperUtils">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- dbcp连接池配置 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<!-- 用户名 -->
+		<property name="username" value="TES" />
+		<!-- 用户密码 -->
+		<property name="password" value="Aa123456" />
+		<property name="driverClassName" value="com.sap.db.jdbc.Driver" />
+		<!-- <property name="jdbcUrl" value="jdbc:sap://172.26.164.10:30015/TDS"/> -->
+		<!--<property name="url" value="jdbc:sap://172.26.119.70:30015/TES" />-->
+		 <property name="url" value="jdbc:sap://172.26.66.36:30015/TES" />
+		<!--连接池中保留的最大连接数。默认值: 15 -->
+		<property name="maxIdle" value="10" />
+		<!-- 连接池中保留的最小连接数，默认为：3 -->
+		<property name="minIdle" value="5" />
+		<!--initialSize: 初始化连接-->    
+        <property name="initialSize" value="100"/>
+		<property name="maxActive" value="300"/>
+		<!-- <property name="maxTotal" value="100"/> -->
+		<!-- <property name="testWhileIdle">
+		   <value>false</value>
+		</property>
+		<property name="testOnReturn">
+		   <value>false</value>
+		</property>
+		<property name="testOnBorrow">
+		   <value>false</value>
+		</property> -->
+		<!-- 初始化连接池中的连接数，取值应在minPoolSize与maxPoolSize之间，默认为3 -->
+		<!-- <property name="initialSize" value="10" /> -->
+		<!--最大空闲时间，60秒内未使用则连接被丢弃。若为0则永不丢弃。默认值: 0 -->
+		<!-- <property name="maxWait" value="5" /> -->
+	</bean>
+	
+	<bean id="jedisFactory" class="com.edcs.tds.storm.redis.JedisFactory">
+		<property name="timeout" value="2000" />
+		<property name="addressList">
+			<list>
+				<value>172.26.119.67:18000</value>
+				<value>172.26.119.68:18001</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="proxyJedisPool" factory-bean="jedisFactory"
+		factory-method="createProxyJedisPool" />
+	<bean id="messageRepeatFilter" class="com.edcs.tds.storm.service.MessageRepeatFilter">
+		<property name="redisClient" ref="redisClient" />
+	</bean>
+	<bean id="redisClient" class="com.edcs.tds.storm.redis.RedisClient">
+	    <property name="proxyJedisPool" ref="proxyJedisPool"/>
+	</bean>
+</beans>

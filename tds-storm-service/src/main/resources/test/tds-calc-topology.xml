@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd"
+	default-lazy-init="true" default-init-method="init">
+
+	<import resource="classpath:topology-base.xml" />
+	<bean id="cacheService" class="com.edcs.tds.storm.service.CacheService">
+	</bean>
+	
+	<bean id="syncResultDataService" class="com.edcs.tds.storm.service.SyncResultDataService">
+	       <property name="resultDataDao" ref="resultDataDao12"/>
+	</bean>
+	<bean id="alertListInfoImpl" class="com.edcs.tds.storm.dao.impl.AlertListInfoImpl">
+		<property name="hanaDataHandler" ref="hanaDataHandler"/>
+	</bean>
+	<bean id="resultDataDao12" class = "com.edcs.tds.storm.dao.ResultDataDao">
+		<!--<property name="dbHelperUtils" ref="dbUtils" />-->
+		<property name="alertListInfoImpl" ref="alertListInfoImpl" />
+		<property name="hanaDataHandler" ref="hanaDataHandler"/>
+     </bean>
+     
+     <bean id="dataService" class = "com.edcs.tds.storm.service.DataService">
+         <property name="hanaDataHandler" ref="hanaDataHandler"/>
+         <property name="redisClient" ref="redisClient"/>
+     </bean>
+     
+     <bean id="hanaDataHandler" class = "com.edcs.tds.storm.db.HanaDataHandler">
+         <property name="databaseHelper" ref="databaseHelper"/>
+     </bean>
+     
+     <bean id= "databaseHelper" class = "com.edcs.tds.storm.db.DatabaseHelper">
+          <property name="dataSource" ref="dataSource"/>
+     </bean>
+
+	<!-- <bean id="dataKafkaClient" class="com.edcs.tds.storm.util.KafkaClient">
+		<property name="properties">
+			<props>
+				<prop key="value.serializer">org.apache.kafka.common.serialization.ByteArraySerializer
+				</prop>
+				<prop key="key.serializer">org.apache.kafka.common.serialization.ByteArraySerializer
+				</prop>
+				<prop key="bootstrap.servers">172.26.119.73:6667,172.26.119.74:6667,172.26.119.75:6667</prop>
+			</props>
+		</property>
+		<property name="defaultTopic" value="tes-calc-data" />
+	</bean> -->
+	<bean id="scriptExecutor" class="com.edcs.tds.storm.core.ScriptExecutor"></bean>
+
+    <!--线程池  -->
+	<bean id="executorService" class="java.util.concurrent.ThreadPoolExecutor">
+		<constructor-arg value="30" index="0" />
+		<constructor-arg value="30" index="1" />
+		<constructor-arg value="0" index="2" />
+		<constructor-arg value="SECONDS" index="3"
+			type="java.util.concurrent.TimeUnit" />
+		<constructor-arg index="4">
+			<bean class="java.util.concurrent.LinkedBlockingQueue" />
+		</constructor-arg>
+	</bean>
+</beans>

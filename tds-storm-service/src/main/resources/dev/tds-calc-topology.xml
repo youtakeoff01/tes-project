@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd"
+	default-lazy-init="true" default-init-method="init">
+
+	<import resource="classpath:topology-base.xml" />
+
+	<bean id="syncResultDataService" class="com.edcs.tds.storm.service.SyncResultDataService">
+	       <property name="resultDataDao" ref="resultDataDao12"/>
+	</bean>
+	<bean id="alertListInfoImpl" class="com.edcs.tds.storm.dao.impl.AlertListInfoImpl">
+		<property name="hanaDataHandler" ref="hanaDataHandler"/>
+	</bean>
+	<bean id="resultDataDao12" class = "com.edcs.tds.storm.dao.ResultDataDao">
+		<!--<property name="dbHelperUtils" ref="dbUtils" />-->
+		<property name="alertListInfoImpl" ref="alertListInfoImpl" />
+		<property name="hanaDataHandler" ref="hanaDataHandler"/>
+     </bean>
+     
+     <bean id="dataService" class = "com.edcs.tds.storm.service.DataService">
+         <property name="hanaDataHandler" ref="hanaDataHandler"/>
+         <property name="redisClient" ref="redisClient"/>
+     </bean>
+     
+     <bean id="hanaDataHandler" class = "com.edcs.tds.storm.db.HanaDataHandler">
+         <property name="databaseHelper" ref="databaseHelper"/>
+         <property name="redisClient" ref="redisClient"/>
+     </bean>
+     
+     <bean id= "databaseHelper" class = "com.edcs.tds.storm.db.DatabaseHelper">
+          <property name="dataSource" ref="dataSource"/>
+     </bean>
+
+	<bean id="scriptExecutor" class="com.edcs.tds.storm.core.ScriptExecutor"></bean>
+
+    <!--线程池  -->
+	<bean id="executorService" class="java.util.concurrent.ThreadPoolExecutor">
+		<constructor-arg value="30" index="0" />
+		<constructor-arg value="30" index="1" />
+		<constructor-arg value="0" index="2" />
+		<constructor-arg value="SECONDS" index="3"
+			type="java.util.concurrent.TimeUnit" />
+		<constructor-arg index="4">
+			<bean class="java.util.concurrent.LinkedBlockingQueue" />
+		</constructor-arg>
+	</bean>
+</beans>
